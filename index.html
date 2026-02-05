@@ -1,0 +1,544 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Verbs Quiz - Must/Have to/Can</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #f5576c;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 30px;
+            background: #ecf0f1;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+        }
+
+        .progress-bar-correct {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .progress-bar-incorrect {
+            height: 100%;
+            background: linear-gradient(90deg, #c0392b, #e74c3c);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2c3e50;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #f5576c;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            border-color: #f5576c;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #f5576c;
+            color: white;
+            border-color: #f5576c;
+        }
+
+        .option.correct {
+            background: #27ae60;
+            color: white;
+            border-color: #27ae60;
+        }
+
+        .option.incorrect {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            background: #f5576c;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #e04558;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            text-align: center;
+            display: none;
+        }
+
+        .results h2 {
+            color: #f5576c;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .score {
+            font-size: 3em;
+            color: #27ae60;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .score.fail {
+            color: #e74c3c;
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen p {
+            font-size: 1.2em;
+            margin: 20px 0;
+            color: #555;
+        }
+
+        .start-button {
+            font-size: 1.3em;
+            padding: 15px 50px;
+            margin-top: 20px;
+        }
+
+        .quiz-content {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #f5576c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Modal Verbs Quiz: Must/Have to/Can</h1>
+        
+        <div class="start-screen" id="startScreen">
+            <p>Test your knowledge of modal verbs!</p>
+            <p>📝 10 questions per attempt</p>
+            <p>⏱️ 5 minutes to complete</p>
+            <p>🎯 Choose the correct modal verb to complete each sentence</p>
+            
+            <div class="form-group">
+                <label for="studentName">Your Name:</label>
+                <input type="text" id="studentName" placeholder="Enter your name" required>
+            </div>
+            
+            <button class="start-button" onclick="startQuiz()">Start Quiz</button>
+        </div>
+
+        <div class="quiz-content" id="quizContent">
+            <div class="timer" id="timer">Time: 5:00</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar-correct" id="progressBarCorrect"></div>
+                <div class="progress-bar-incorrect" id="progressBarIncorrect"></div>
+                <div class="progress-text" id="progressText">0/10</div>
+            </div>
+
+            <div class="question-container" id="questionContainer">
+                <div class="question-number" id="questionNumber">Question 1</div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="optionsContainer"></div>
+            </div>
+
+            <div class="nav-buttons">
+                <button id="prevBtn" onclick="previousQuestion()" disabled>Previous</button>
+                <button id="nextBtn" onclick="nextQuestion()">Next</button>
+                <button id="submitBtn" onclick="submitQuiz()" style="display: none;">Submit Quiz</button>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <h2>Quiz Completed!</h2>
+            <div class="score" id="finalScore"></div>
+            <p id="resultMessage"></p>
+            <button onclick="location.reload()">Take Quiz Again</button>
+        </div>
+    </div>
+
+    <script>
+        const questionBank = [
+            {q: "Steve ___ forget to buy milk on his way home. It is on the shopping list.", options: ["must", "mustn't", "have to", "don't have to"], correct: "mustn't"},
+            {q: "You ___ forget to turn off the lights when you leave the room.", options: ["must", "mustn't", "can", "can't"], correct: "mustn't"},
+            {q: "Students ___ cheat during the exam. It is a strict prohibition.", options: ["don't have to", "mustn't", "can", "have to"], correct: "mustn't"},
+            {q: "You ___ buy books at schools because they are free.", options: ["must", "mustn't", "don't have to", "have to"], correct: "don't have to"},
+            {q: "We ___ forget to finish homework on time or we will fail the exam.", options: ["can", "mustn't", "don't have to", "have to"], correct: "mustn't"},
+            {q: "I ___ finish reading this book by tomorrow because I have to return it.", options: ["mustn't", "have to", "can", "don't have to"], correct: "have to"},
+            {q: "___ students wear casual clothes at school in Uzbekistan?", options: ["Has to", "Can", "Must", "Have to"], correct: "Can"},
+            {q: "You ___ wear a seatbelt in the car. It's the law.", options: ["must", "mustn't", "can", "don't have to"], correct: "must"},
+            {q: "We ___ pay for the museum entry. It's free on Sundays.", options: ["must", "have to", "don't have to", "mustn't"], correct: "don't have to"},
+            {q: "You ___ smoke in this area. It's prohibited.", options: ["can", "must", "mustn't", "have to"], correct: "mustn't"},
+            {q: "___ I borrow your pen for a moment?", options: ["Must", "Have to", "Can", "Mustn't"], correct: "Can"},
+            {q: "Students ___ submit their assignments by Friday.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "You ___ shout in the library. Please be quiet.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "We ___ bring our own lunch. The school provides meals.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ you speak English fluently?", options: ["Must", "Have to", "Can", "Mustn't"], correct: "Can"},
+            {q: "Employees ___ arrive at work before 9 AM.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "You ___ touch the paintings in the art gallery.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "Children ___ go to school on Saturdays in Uzbekistan.", options: ["must", "have to", "don't have to", "mustn't"], correct: "don't have to"},
+            {q: "Drivers ___ stop at red traffic lights.", options: ["can", "don't have to", "must", "can't"], correct: "must"},
+            {q: "You ___ park your car here. It's a no-parking zone.", options: ["can", "must", "have to", "can't"], correct: "can't"},
+            {q: "___ we leave early today?", options: ["Must", "Have to", "Can", "Don't have to"], correct: "Can"},
+            {q: "You ___ wear a uniform at this school. It's required.", options: ["can", "don't have to", "have to", "mustn't"], correct: "have to"},
+            {q: "Passengers ___ use mobile phones during takeoff.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "We ___ buy tickets in advance. We can buy them at the door.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ children play in the playground after dark?", options: ["Must", "Have to", "Can", "Don't have to"], correct: "Can"},
+            {q: "You ___ be 18 years old to vote in elections.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "Visitors ___ feed the animals at the zoo.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "You ___ bring a gift to the party. It's optional.", options: ["must", "have to", "don't have to", "mustn't"], correct: "don't have to"},
+            {q: "Students ___ use calculators during the math test.", options: ["must", "have to", "can", "mustn't"], correct: "can"},
+            {q: "You ___ have a passport to travel internationally.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "People ___ litter in public places. Use the trash bins.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "We ___ wear formal clothes to the casual party.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ I open the window? It's quite hot in here.", options: ["Must", "Have to", "Can", "Mustn't"], correct: "Can"},
+            {q: "Doctors ___ wash their hands before examining patients.", options: ["can", "don't have to", "must", "can't"], correct: "must"},
+            {q: "You ___ run in the hallways. It's dangerous.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "Students ___ do homework every day, but it helps them learn.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ you swim when you were five years old?", options: ["Must", "Have to", "Can", "Could"], correct: "Could"},
+            {q: "You ___ show your ID card to enter the building.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "Patients ___ smoke in the hospital. It's strictly forbidden.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "We ___ reserve a table at the restaurant. It's not very busy.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ we use our phones during the meeting?", options: ["Must", "Have to", "Can", "Don't have to"], correct: "Can"},
+            {q: "Employees ___ attend the training session tomorrow.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "You ___ be late for the interview. Make a good impression.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "You ___ tip the waiter in this country. Service is included.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ I help you with your bags?", options: ["Must", "Have to", "Can", "Mustn't"], correct: "Can"},
+            {q: "You ___ register for the course by next Monday.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "Children ___ play with matches. It's very dangerous.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "We ___ book tickets online. We can buy them at the station.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ you play any musical instruments?", options: ["Must", "Have to", "Can", "Don't have to"], correct: "Can"},
+            {q: "All students ___ take the final exam to pass the course.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "You ___ use your phone while driving. It's illegal.", options: ["can", "must", "have to", "mustn't"], correct: "mustn't"},
+            {q: "You ___ bring your own equipment. We provide everything.", options: ["must", "have to", "don't have to", "can't"], correct: "don't have to"},
+            {q: "___ I ask you a personal question?", options: ["Must", "Have to", "Can", "Mustn't"], correct: "Can"},
+            {q: "Workers ___ wear safety helmets on the construction site.", options: ["can", "mustn't", "must", "don't have to"], correct: "must"},
+            {q: "You ___ enter this room. It's restricted access only.", options: ["can", "must", "have to", "can't"], correct: "can't"},
+            {q: "We ___ finish all the food on our plates. Eat what you want.", options: ["must", "have to", "don't have to", "mustn't"], correct: "don't have to"},
+            {q: "___ you see the mountains from your house?", options: ["Must", "Have to", "Can", "Don't have to"], correct: "Can"},
+            {q: "You ___ renew your driver's license every five years.", options: ["can", "mustn't", "have to", "don't have to"], correct: "have to"},
+            {q: "Guests ___ take food from the buffet more than once. Help yourself!", options: ["mustn't", "can't", "don't have to", "can"], correct: "can"},
+            {q: "You ___ be quiet in the hospital. Patients are resting.", options: ["can", "don't have to", "must", "can't"], correct: "must"}
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let answers = [];
+        let correctAnswers = 0;
+        let timerInterval;
+        let timeLeft = 300; // 5 minutes in seconds
+        let studentName = "";
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startQuiz() {
+            const nameInput = document.getElementById('studentName');
+            
+            studentName = nameInput.value.trim();
+            
+            if (!studentName) {
+                alert('Please enter your name before starting the quiz.');
+                return;
+            }
+
+            currentQuestions = shuffleArray(questionBank).slice(0, 10);
+            answers = new Array(10).fill(null);
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('quizContent').style.display = 'block';
+            
+            displayQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = 
+                    `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function displayQuestion() {
+            const question = currentQuestions[currentQuestionIndex];
+            document.getElementById('questionNumber').textContent = `Question ${currentQuestionIndex + 1}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach(option => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option;
+                if (answers[currentQuestionIndex] === option) {
+                    div.classList.add('selected');
+                }
+                div.onclick = () => selectOption(option);
+                optionsContainer.appendChild(div);
+            });
+            
+            updateNavigationButtons();
+            updateProgressBar();
+        }
+
+        function selectOption(option) {
+            answers[currentQuestionIndex] = option;
+            displayQuestion();
+        }
+
+        function updateProgressBar() {
+            const answered = answers.filter(a => a !== null).length;
+            
+            // Count correct and incorrect answers so far
+            let correct = 0;
+            let incorrect = 0;
+            
+            for (let i = 0; i < answers.length; i++) {
+                if (answers[i] !== null) {
+                    if (answers[i] === currentQuestions[i].correct) {
+                        correct++;
+                    } else {
+                        incorrect++;
+                    }
+                }
+            }
+            
+            const correctPercentage = (correct / 10) * 100;
+            const incorrectPercentage = (incorrect / 10) * 100;
+            
+            document.getElementById('progressBarCorrect').style.width = correctPercentage + '%';
+            document.getElementById('progressBarIncorrect').style.width = incorrectPercentage + '%';
+            document.getElementById('progressText').textContent = `${answered}/10 (✓${correct} ✗${incorrect})`;
+        }
+
+        function updateNavigationButtons() {
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === 9) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('submitBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'block';
+                document.getElementById('submitBtn').style.display = 'none';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < 9) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            correctAnswers = 0;
+            for (let i = 0; i < currentQuestions.length; i++) {
+                if (answers[i] === currentQuestions[i].correct) {
+                    correctAnswers++;
+                }
+            }
+            
+            const score = (correctAnswers / 10) * 100;
+            const timeTaken = 300 - timeLeft;
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            
+            sendToGoogleSheets(score, `${minutes}:${seconds.toString().padStart(2, '0')}`);
+            
+            document.getElementById('quizContent').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            const scoreElement = document.getElementById('finalScore');
+            scoreElement.textContent = `${correctAnswers}/10 (${score}%)`;
+            
+            if (score >= 70) {
+                scoreElement.className = 'score';
+                document.getElementById('resultMessage').textContent = 'Great job! You passed! 🎉';
+            } else {
+                scoreElement.className = 'score fail';
+                document.getElementById('resultMessage').textContent = 'Keep practicing! You can do better! 💪';
+            }
+        }
+
+        function sendToGoogleSheets(score, timeTaken) {
+            const formData = new FormData();
+            formData.append('name', studentName);
+            formData.append('score', score);
+            formData.append('correctAnswers', correctAnswers);
+            formData.append('timeTaken', timeTaken);
+            formData.append('date', new Date().toLocaleString());
+            formData.append('quizType', 'Modal Verbs Quiz');
+            
+            // Google Apps Script Web App URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzvhd9K2CVC9_EPkhAEYFDp8K1CBpGUWNrEAEVC4w4Q8eHh5uDFO_aaKPMcH-Tajv5U/exec';
+            
+            fetch(scriptURL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => console.log('Success!', response))
+            .catch(error => console.error('Error!', error.message));
+        }
+    </script>
+</body>
+</html>
