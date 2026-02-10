@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +13,12 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            /* Engaging Background Photo */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -23,12 +27,13 @@
         }
 
         .container {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             max-width: 800px;
             width: 100%;
             padding: 40px;
+            backdrop-filter: blur(5px);
         }
 
         h1 {
@@ -107,6 +112,9 @@
             margin-bottom: 20px;
             line-height: 1.6;
             color: #2c3e50;
+            background: #fff5f6;
+            padding: 15px;
+            border-radius: 10px;
         }
 
         .options {
@@ -136,21 +144,9 @@
             border-color: #f5576c;
         }
 
-        .option.correct {
-            background: #27ae60;
-            color: white;
-            border-color: #27ae60;
-        }
-
-        .option.incorrect {
-            background: #e74c3c;
-            color: white;
-            border-color: #e74c3c;
-        }
-
         .nav-buttons {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end; /* Pushed to right since Previous is gone */
             margin-top: 30px;
         }
 
@@ -183,12 +179,6 @@
             display: none;
         }
 
-        .results h2 {
-            color: #f5576c;
-            margin-bottom: 20px;
-            font-size: 2em;
-        }
-
         .score {
             font-size: 3em;
             color: #27ae60;
@@ -204,12 +194,6 @@
             text-align: center;
         }
 
-        .start-screen p {
-            font-size: 1.2em;
-            margin: 20px 0;
-            color: #555;
-        }
-
         .start-button {
             font-size: 1.3em;
             padding: 15px 50px;
@@ -222,6 +206,7 @@
 
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
         }
 
         .form-group label {
@@ -238,14 +223,12 @@
             border-radius: 8px;
             font-size: 1em;
         }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #f5576c;
-        }
     </style>
 </head>
 <body>
+    <audio id="soundCorrect" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+    <audio id="soundIncorrect" src="https://assets.mixkit.co/active_storage/sfx/2003/2003-preview.mp3"></audio>
+
     <div class="container">
         <h1>Modal Verbs Quiz: Must/Have to/Can</h1>
         
@@ -253,7 +236,6 @@
             <p>Test your knowledge of modal verbs!</p>
             <p>📝 10 questions per attempt</p>
             <p>⏱️ 5 minutes to complete</p>
-            <p>🎯 Choose the correct modal verb to complete each sentence</p>
             
             <div class="form-group">
                 <label for="studentName">Your Name:</label>
@@ -279,7 +261,6 @@
             </div>
 
             <div class="nav-buttons">
-                <button id="prevBtn" onclick="previousQuestion()" disabled>Previous</button>
                 <button id="nextBtn" onclick="nextQuestion()">Next</button>
                 <button id="submitBtn" onclick="submitQuiz()" style="display: none;">Submit Quiz</button>
             </div>
@@ -362,7 +343,7 @@
         let answers = [];
         let correctAnswers = 0;
         let timerInterval;
-        let timeLeft = 300; // 5 minutes in seconds
+        let timeLeft = 300; 
         let studentName = "";
 
         function shuffleArray(array) {
@@ -376,9 +357,7 @@
 
         function startQuiz() {
             const nameInput = document.getElementById('studentName');
-            
             studentName = nameInput.value.trim();
-            
             if (!studentName) {
                 alert('Please enter your name before starting the quiz.');
                 return;
@@ -386,10 +365,8 @@
 
             currentQuestions = shuffleArray(questionBank).slice(0, 10);
             answers = new Array(10).fill(null);
-            
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('quizContent').style.display = 'block';
-            
             displayQuestion();
             startTimer();
         }
@@ -399,9 +376,7 @@
                 timeLeft--;
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                document.getElementById('timer').textContent = 
-                    `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
+                document.getElementById('timer').textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     submitQuiz();
@@ -433,24 +408,26 @@
         }
 
         function selectOption(option) {
+            // Audio Logic
+            if (option === currentQuestions[currentQuestionIndex].correct) {
+                document.getElementById('soundCorrect').play();
+            } else {
+                document.getElementById('soundIncorrect').play();
+            }
+
             answers[currentQuestionIndex] = option;
             displayQuestion();
         }
 
         function updateProgressBar() {
             const answered = answers.filter(a => a !== null).length;
-            
-            // Count correct and incorrect answers so far
             let correct = 0;
             let incorrect = 0;
             
             for (let i = 0; i < answers.length; i++) {
                 if (answers[i] !== null) {
-                    if (answers[i] === currentQuestions[i].correct) {
-                        correct++;
-                    } else {
-                        incorrect++;
-                    }
+                    if (answers[i] === currentQuestions[i].correct) correct++; 
+                    else incorrect++;
                 }
             }
             
@@ -463,8 +440,6 @@
         }
 
         function updateNavigationButtons() {
-            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
-            
             if (currentQuestionIndex === 9) {
                 document.getElementById('nextBtn').style.display = 'none';
                 document.getElementById('submitBtn').style.display = 'block';
@@ -481,21 +456,11 @@
             }
         }
 
-        function previousQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                displayQuestion();
-            }
-        }
-
         function submitQuiz() {
             clearInterval(timerInterval);
-            
             correctAnswers = 0;
             for (let i = 0; i < currentQuestions.length; i++) {
-                if (answers[i] === currentQuestions[i].correct) {
-                    correctAnswers++;
-                }
+                if (answers[i] === currentQuestions[i].correct) correctAnswers++;
             }
             
             const score = (correctAnswers / 10) * 100;
@@ -507,7 +472,6 @@
             
             document.getElementById('quizContent').style.display = 'none';
             document.getElementById('results').style.display = 'block';
-            
             const scoreElement = document.getElementById('finalScore');
             scoreElement.textContent = `${correctAnswers}/10 (${score}%)`;
             
@@ -529,7 +493,6 @@
             formData.append('date', new Date().toLocaleString());
             formData.append('quizType', 'Modal Verbs Quiz');
             
-            // Google Apps Script Web App URL
             const scriptURL = 'https://script.google.com/macros/s/AKfycbzvhd9K2CVC9_EPkhAEYFDp8K1CBpGUWNrEAEVC4w4Q8eHh5uDFO_aaKPMcH-Tajv5U/exec';
             
             fetch(scriptURL, {
